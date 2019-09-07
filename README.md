@@ -19,11 +19,15 @@ Map is guaranteed to be connected. That is, every two grid are connected by a pa
 ![Typical Map](https://raw.githubusercontent.com/ahyangyi/Civ4-mapgen/master/images/map.jpg)
 
 ### Riveria
-Draw rivers to split the map into random regions. Navy is probably necessary, but it is not going to dominate your game, since adjacent continents are close to each other.
+Draw “rivers” consisting of water tiles. Navy is probably necessary, but it is not going to dominate your game, since even if the land is not connected, adjacent continents are close to each other.
+
+![Riveria](https://raw.githubusercontent.com/ahyangyi/Civ4-mapgen/master/images/riveria.jpg)
 
 ## Minor Options
 Default water level and climate options are supported.
 
 Maps can be generated in various symmetry. Note that the option does not guarantee any symmetry in placement of starting locations.
+
+![2-way rotational symmetry](https://raw.githubusercontent.com/ahyangyi/Civ4-mapgen/master/images/symmetry.jpg)
 
 Multiple climate modes are provided.
