@@ -636,10 +636,6 @@ class varDiamondTransformer(transformer):
         quadrant = math.floor(theta / (math.pi / 2)) * math.pi / 2
         theta = theta - quadrant - math.pi / 4
         
-#        x = rho * math.sin(theta)
-#        ya = 2 * (rho**2) * (math.cos(theta)**2)
-#        y = math.sqrt((ya + 1 / ya)/2)
-
         rho = math.sqrt(rho + 1./16)
         x = rho * math.sin(theta)
         ya = 2 * (rho**2) * (math.cos(theta)**2)
