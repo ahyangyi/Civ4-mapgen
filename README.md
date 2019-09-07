@@ -16,6 +16,8 @@ Iterative fractal-based map generation. The resulting map is unpredictable, and 
 
 Map is guaranteed to be connected. That is, every two grid are connected by a path without mountains.
 
+![Typical Map](https://raw.githubusercontent.com/ahyangyi/Civ4-mapgen/master/images/map.jpg)
+
 ### Riveria
 Draw rivers to split the map into random regions. Navy is probably necessary, but it is not going to dominate your game, since adjacent continents are close to each other.
 
