@@ -1,503 +1,487 @@
-from CvPythonExtensions import *
-import CvUtil
-import CvMapGeneratorUtil
+#!/usr/bin/env python2
 import math
 import random
 import cmath
 
-from CvMapGeneratorUtil import FractalWorld
-from CvMapGeneratorUtil import TerrainGenerator
-from CvMapGeneratorUtil import FeatureGenerator
+if __name__ != "__main__":
+    from CvPythonExtensions import *
+    import CvUtil
+    import CvMapGeneratorUtil
+    from CvMapGeneratorUtil import FractalWorld
+    from CvMapGeneratorUtil import TerrainGenerator
+    from CvMapGeneratorUtil import FeatureGenerator
 
-def getDescription():
-    return "Antaeus Map Generator: a combination of various fun and unpredictable generators."
-        
-def isAdvancedMap():
-        return 0
+    def getDescription():
+        return "Antaeus Map Generator: a combination of various fun and unpredictable generators."
 
-def getNumCustomMapOptions():
-        return 4
-        
-def getCustomMapOptionName(argsList):
-        selection_names = {
-                        0 : "type of map",
-                        1 : "type of generator",
-                        2 : "symmetry",
-                        3 : "distribution of climate."
-                }
-        translated_text = unicode(CyTranslator().getText(selection_names[argsList[0]], ()))
-        return translated_text
-        
-def getNumCustomMapOptionValues(argsList):
-        selection_names = {
-                                0: 3,
-                                1: 3,
-                                2: 8,
-                                3: 6
-                        }
-        return selection_names[argsList[0]]
-        
-def getCustomMapOptionDescAt(argsList):
-        selection_names = {
-                0: ["Flat",
-                    "Cylindrical",
-                    "Toroid"],
-                1: ["IID",
-                    "Fractal Land",
-                    "Riveria"],
-                2: ["None",
-                    "2-Rotational",
-                    "3-Rotational",
-                    "4-Rotational",
-                    "5-Rotational",
-                    "Bilateral",
-                    "2-Dihedral",
-                    "3-Dihedral",],
-                3: ["Default",
-                    "Global",
-                    "North Hemisphere",
-                    "Fractal",
-                    "Regional",
-                    "Regional Fractal"]
-                }
-        translated_text = unicode(CyTranslator().getText(selection_names[argsList[0]][argsList[1]], ()))
-        return translated_text
-
-def getCustomMapOptionDefault(argsList):
-        [iOption] = argsList
-        option_defaults = {
-                0:      1,
-                1:      1,
-                2:      0,
-                3:      0,
-                }
-        return option_defaults[iOption]
-
-def isRandomCustomMapOption(argsList):
-        [iOption] = argsList
-        option_random = {
-                0:      true,
-                1:      true,
-                2:      true,
-                3:      true,
-                }
-        return option_random[iOption]
-
-def getMapType ():
-        return CyMap().getCustomMapOption(0)
-        
-def getGeneratorType ():
-        return CyMap().getCustomMapOption(1)
-        
-def getSymmetryType ():
-        SymmetryList = {
-                0: 0,
-                1: 2,
-                2: 3,
-                3: 4,
-                4: 5,
-                5: -1,
-                6: -2,
-                7: -3
-                }
-        return SymmetryList[CyMap().getCustomMapOption(2)]
-        
-def getClimateType ():
-        if CyMap().getCustomMapOption(3) == 0:
-                if getMapType() == 0:
-                        return 3
-                elif getMapType() == 1:
-                        return 0
-                else:
-                        return 4
-                        
-        else:
-                return CyMap().getCustomMapOption(3) - 1
-        
-def getWrapX():
-        return (getMapType () == 1 or getMapType () == 2)
-        
-def getWrapY():
-        return (getMapType () == 2)
-        
-def isAdvancedMap():
+    def isAdvancedMap():
         "This map should show up in simple mode"
         return 0
 
-def getGridSize(argsList):
-	# Reduce grid sizes by one level.
-	grid_sizes = {
-		WorldSizeTypes.WORLDSIZE_DUEL:		(6,4),
-		WorldSizeTypes.WORLDSIZE_TINY:		(8,5),
-		WorldSizeTypes.WORLDSIZE_SMALL:		(10,6),
-		WorldSizeTypes.WORLDSIZE_STANDARD:	(13,8),
-		WorldSizeTypes.WORLDSIZE_LARGE:		(16,10),
-		WorldSizeTypes.WORLDSIZE_HUGE:		(21,13)
+    def getNumCustomMapOptions():
+        return 4
+
+    def getCustomMapOptionName(argsList):
+        selection_names = {
+                0 : "type of map",
+                1 : "type of generator",
+                2 : "symmetry",
+                3 : "distribution of climate"
+                }
+        translated_text = unicode(CyTranslator().getText(selection_names[argsList[0]], ()))
+        return translated_text
+
+    def getNumCustomMapOptionValues(argsList):
+        selection_names = {
+                0: 3,
+                1: 3,
+                2: 10,
+                3: 6,
+                }
+        return selection_names[argsList[0]]
+
+    def getCustomMapOptionDescAt(argsList):
+        selection_names = {
+            0: ["Flat",
+                "Cylindrical",
+                "Toroid"],
+            1: ["IID",
+                "Fractal Land",
+                "Riveria"],
+            2: ["None",
+                "2-Rotational",
+                "3-Rotational",
+                "4-Rotational",
+                "5-Rotational",
+                "Bilateral",
+                "2-Dihedral",
+                "3-Dihedral",
+                "4-Dihedral (experimental)",
+                "5-Dihedral (experimental)",
+                ],
+            3: ["Default",
+                "Global",
+                "North Hemisphere",
+                "Fractal",
+                "Regional",
+                "Regional Fractal"]
+            }
+        translated_text = unicode(CyTranslator().getText(selection_names[argsList[0]][argsList[1]], ()))
+        return translated_text
+
+    def getCustomMapOptionDefault(argsList):
+        [iOption] = argsList
+        option_defaults = {
+            0:      1,
+            1:      1,
+            2:      0,
+            3:      0,
+            }
+        return option_defaults[iOption]
+
+    def isRandomCustomMapOption(argsList):
+        [iOption] = argsList
+        option_random = {
+            0:      true,
+            1:      true,
+            2:      true,
+            3:      true,
+            }
+        return option_random[iOption]
+
+    def getMapType ():
+        return CyMap().getCustomMapOption(0)
+
+    def getGeneratorType ():
+        return CyMap().getCustomMapOption(1)
+
+    def getSymmetryType ():
+        SymmetryList = {
+            0: 0,
+            1: 2,
+            2: 3,
+            3: 4,
+            4: 5,
+            5: -1,
+            6: -2,
+            7: -3,
+            8: -4,
+            9: -5,
+            }
+        return SymmetryList[CyMap().getCustomMapOption(2)]
+
+    def getClimateType ():
+        if CyMap().getCustomMapOption(3) == 0:
+            if getMapType() == 0:
+                return 3
+            elif getMapType() == 1:
+                return 0
+            else:
+                return 4
+        else:
+            return CyMap().getCustomMapOption(3) - 1
+
+    def getWrapX():
+        return (getMapType () == 1 or getMapType () == 2)
+
+    def getWrapY():
+        return (getMapType () == 2)
+
+    def getGridSize(argsList):
+        # Reduce grid sizes by one level.
+        grid_sizes = {
+            WorldSizeTypes.WORLDSIZE_DUEL:      (6,4),
+            WorldSizeTypes.WORLDSIZE_TINY:      (8,5),
+            WorldSizeTypes.WORLDSIZE_SMALL:     (10,6),
+            WorldSizeTypes.WORLDSIZE_STANDARD:  (13,8),
+            WorldSizeTypes.WORLDSIZE_LARGE:     (16,10),
+            WorldSizeTypes.WORLDSIZE_HUGE:      (21,13)
         }
 
-	if (argsList[0] == -1): # (-1,) is passed to function on loads
-		return []
-	[eWorldSize] = argsList
-	return grid_sizes[eWorldSize]
+        if (argsList[0] == -1): # (-1,) is passed to function on loads
+            return []
+        [eWorldSize] = argsList
+        return grid_sizes[eWorldSize]
 
-class IIDPlotGenerator(CvMapGeneratorUtil.FractalWorld):
+    class IIDPlotGenerator(CvMapGeneratorUtil.FractalWorld):
         def __init__(self, fracXExp=CyFractal.FracVals.DEFAULT_FRAC_X_EXP,
                      fracYExp=CyFractal.FracVals.DEFAULT_FRAC_Y_EXP):
-                self.gc = CyGlobalContext()
-                self.map = self.gc.getMap()
-                self.iNumPlotsX = self.map.getGridWidth()
-                self.iNumPlotsY = self.map.getGridHeight()
-                self.mapRand = self.gc.getGame().getMapRand()
-                self.iFlags = self.map.getMapFractalFlags()
-                self.plotTypes = [PlotTypes.PLOT_OCEAN] * (self.iNumPlotsX*self.iNumPlotsY)
-                self.fracXExp = fracXExp
-                self.fracYExp = fracYExp
-                # init User Input variances
-                self.seaLevelChange = self.gc.getSeaLevelInfo(self.map.getSeaLevel()).getSeaLevelChange()
-                self.seaLevelMax = 100
-                self.seaLevelMin = 0
-                self.hillGroupOneRange = self.gc.getClimateInfo(self.map.getClimate()).getHillRange()
-                self.hillGroupOneBase = 25
-                self.hillGroupTwoRange = self.gc.getClimateInfo(self.map.getClimate()).getHillRange()
-                self.hillGroupTwoBase = 75
-                self.peakPercent = self.gc.getClimateInfo(self.map.getClimate()).getPeakPercent()
-                self.stripRadius = 15
+            self.gc = CyGlobalContext()
+            self.map = self.gc.getMap()
+            self.iNumPlotsX = self.map.getGridWidth()
+            self.iNumPlotsY = self.map.getGridHeight()
+            self.mapRand = self.gc.getGame().getMapRand()
+            self.iFlags = self.map.getMapFractalFlags()
+            self.plotTypes = [PlotTypes.PLOT_OCEAN] * (self.iNumPlotsX*self.iNumPlotsY)
+            self.fracXExp = fracXExp
+            self.fracYExp = fracYExp
+            # init User Input variances
+            self.seaLevelChange = self.gc.getSeaLevelInfo(self.map.getSeaLevel()).getSeaLevelChange()
+            self.seaLevelMax = 100
+            self.seaLevelMin = 0
+            self.hillGroupOneRange = self.gc.getClimateInfo(self.map.getClimate()).getHillRange()
+            self.hillGroupOneBase = 25
+            self.hillGroupTwoRange = self.gc.getClimateInfo(self.map.getClimate()).getHillRange()
+            self.hillGroupTwoBase = 75
+            self.peakPercent = self.gc.getClimateInfo(self.map.getClimate()).getPeakPercent()
+            self.stripRadius = 15
 
         def initFractal(self):
-                "For no rifts, use rift_grain = -1"
-                return
+            "For no rifts, use rift_grain = -1"
+            return
 
         def generatePlotTypes(self, water_percent=34, shift_plot_types=True, grain_amount=3):
-                # Check for changes to User Input variances.
-                self.checkForOverrideDefaultUserInputVariances()
+            # Check for changes to User Input variances.
+            self.checkForOverrideDefaultUserInputVariances()
 
-                water_percent += self.seaLevelChange
-                water_percent = min(water_percent, self.seaLevelMax)
-                water_percent = max(water_percent, self.seaLevelMin)
-                
-                for x in range(self.iNumPlotsX):
-                        for y in range(self.iNumPlotsY):
-                                i = y*self.iNumPlotsX + x
-                                
-                                if self.mapRand.get(100, "Generate Plot Types PYTHON") < water_percent:
-                                    self.plotTypes[i] = PlotTypes.PLOT_OCEAN
-                                elif self.mapRand.get(100, "Generate Plot Types PYTHON") >= self.hillGroupTwoRange * 4:
-                                    self.plotTypes[i] = PlotTypes.PLOT_LAND
-                                elif self.mapRand.get(100, "Generate Plot Types PYTHON") < self.peakPercent:
+            water_percent += self.seaLevelChange
+            water_percent = min(water_percent, self.seaLevelMax)
+            water_percent = max(water_percent, self.seaLevelMin)
+
+            for x in range(self.iNumPlotsX):
+                for y in range(self.iNumPlotsY):
+                    i = y*self.iNumPlotsX + x
+
+                    if self.mapRand.get(100, "Generate Plot Types PYTHON") < water_percent:
+                        self.plotTypes[i] = PlotTypes.PLOT_OCEAN
+                    elif self.mapRand.get(100, "Generate Plot Types PYTHON") >= self.hillGroupTwoRange * 4:
+                        self.plotTypes[i] = PlotTypes.PLOT_LAND
+                    elif self.mapRand.get(100, "Generate Plot Types PYTHON") < self.peakPercent:
+                        self.plotTypes[i] = PlotTypes.PLOT_PEAK
+                    else:
+                        self.plotTypes[i] = PlotTypes.PLOT_HILLS
+
+            return self.plotTypes
+
+    class PostprocessPlotGenerator(CvMapGeneratorUtil.FractalWorld):
+        def __init__(self, fracXExp=CyFractal.FracVals.DEFAULT_FRAC_X_EXP,
+                     fracYExp=CyFractal.FracVals.DEFAULT_FRAC_Y_EXP):
+            self.gc = CyGlobalContext()
+            self.map = self.gc.getMap()
+            self.iNumPlotsX = self.map.getGridWidth()
+            self.iNumPlotsY = self.map.getGridHeight()
+            self.mapRand = self.gc.getGame().getMapRand()
+            self.iFlags = self.map.getMapFractalFlags()
+            self.plotTypes = [PlotTypes.PLOT_OCEAN] * (self.iNumPlotsX*self.iNumPlotsY)
+            self.fracXExp = fracXExp
+            self.fracYExp = fracYExp
+            self.continentsFrac = CyFractal()
+            self.hillsFrac = CyFractal()
+            self.peaksFrac = CyFractal()
+            # init User Input variances
+            self.seaLevelChange = self.gc.getSeaLevelInfo(self.map.getSeaLevel()).getSeaLevelChange()
+            self.seaLevelMax = 100
+            self.seaLevelMin = 0
+            self.hillGroupOneRange = self.gc.getClimateInfo(self.map.getClimate()).getHillRange()
+            self.hillGroupOneBase = 25
+            self.hillGroupTwoRange = self.gc.getClimateInfo(self.map.getClimate()).getHillRange()
+            self.hillGroupTwoBase = 75
+            self.peakPercent = self.gc.getClimateInfo(self.map.getClimate()).getPeakPercent()
+            self.stripRadius = 15
+
+        def generatePlotTypes(self, mapData, water_percent=78, shift_plot_types=True, grain_amount=3):
+            # Check for changes to User Input variances.
+            self.checkForOverrideDefaultUserInputVariances()
+
+            self.hillsFrac.fracInit(self.iNumPlotsX, self.iNumPlotsY, grain_amount, self.mapRand, self.iFlags, self.fracXExp, self.fracYExp)
+            self.peaksFrac.fracInit(self.iNumPlotsX, self.iNumPlotsY, grain_amount+1, self.mapRand, self.iFlags, self.fracXExp, self.fracYExp)
+
+            water_percent += self.seaLevelChange
+            water_percent = min(water_percent, self.seaLevelMax)
+            water_percent = max(water_percent, self.seaLevelMin)
+
+            iWaterThreshold = self.continentsFrac.getHeightFromPercent(water_percent)
+            iHillsBottom1 = self.hillsFrac.getHeightFromPercent(max((self.hillGroupOneBase - self.hillGroupOneRange), 0))
+            iHillsTop1 = self.hillsFrac.getHeightFromPercent(min((self.hillGroupOneBase + self.hillGroupOneRange), 100))
+            iHillsBottom2 = self.hillsFrac.getHeightFromPercent(max((self.hillGroupTwoBase - self.hillGroupTwoRange), 0))
+            iHillsTop2 = self.hillsFrac.getHeightFromPercent(min((self.hillGroupTwoBase + self.hillGroupTwoRange), 100))
+            iPeakThreshold = self.peaksFrac.getHeightFromPercent(self.peakPercent)
+
+            for x in range(self.iNumPlotsX):
+                for y in range(self.iNumPlotsY):
+                    i = y*self.iNumPlotsX + x
+                    val = self.continentsFrac.getHeight(x,y)
+                    if (val <= iWaterThreshold or mapData[i] == ' ') and (mapData[i] != '*' and mapData[i] != '.' and mapData[i] != '+' and mapData[i] != '#'):
+                        self.plotTypes[i] = PlotTypes.PLOT_OCEAN
+                    else:
+                        if mapData[i] == '.':
+                            self.plotTypes[i] = PlotTypes.PLOT_LAND
+                        elif mapData[i] == '+':
+                            self.plotTypes[i] = PlotTypes.PLOT_HILLS
+                        elif mapData[i] == '#':
+                            self.plotTypes[i] = PlotTypes.PLOT_PEAK
+                        else:
+                            hillVal = self.hillsFrac.getHeight(x,y)
+                            if ((hillVal >= iHillsBottom1 and hillVal <= iHillsTop1) or (hillVal >= iHillsBottom2 and hillVal <= iHillsTop2)):
+                                peakVal = self.peaksFrac.getHeight(x,y)
+                                if (peakVal <= iPeakThreshold):
                                     self.plotTypes[i] = PlotTypes.PLOT_PEAK
                                 else:
                                     self.plotTypes[i] = PlotTypes.PLOT_HILLS
+                            else:
+                                self.plotTypes[i] = PlotTypes.PLOT_LAND
 
-                return self.plotTypes
+            if shift_plot_types:
+                    self.shiftPlotTypes()
 
-class PostprocessPlotGenerator(CvMapGeneratorUtil.FractalWorld):
-        def __init__(self, fracXExp=CyFractal.FracVals.DEFAULT_FRAC_X_EXP,
-                     fracYExp=CyFractal.FracVals.DEFAULT_FRAC_Y_EXP):
-                self.gc = CyGlobalContext()
-                self.map = self.gc.getMap()
-                self.iNumPlotsX = self.map.getGridWidth()
-                self.iNumPlotsY = self.map.getGridHeight()
-                self.mapRand = self.gc.getGame().getMapRand()
-                self.iFlags = self.map.getMapFractalFlags()
-                self.plotTypes = [PlotTypes.PLOT_OCEAN] * (self.iNumPlotsX*self.iNumPlotsY)
-                self.fracXExp = fracXExp
-                self.fracYExp = fracYExp
-                self.continentsFrac = CyFractal()
-                self.hillsFrac = CyFractal()
-                self.peaksFrac = CyFractal()
-                # init User Input variances
-                self.seaLevelChange = self.gc.getSeaLevelInfo(self.map.getSeaLevel()).getSeaLevelChange()
-                self.seaLevelMax = 100
-                self.seaLevelMin = 0
-                self.hillGroupOneRange = self.gc.getClimateInfo(self.map.getClimate()).getHillRange()
-                self.hillGroupOneBase = 25
-                self.hillGroupTwoRange = self.gc.getClimateInfo(self.map.getClimate()).getHillRange()
-                self.hillGroupTwoBase = 75
-                self.peakPercent = self.gc.getClimateInfo(self.map.getClimate()).getPeakPercent()
-                self.stripRadius = 15
+            return self.plotTypes
 
-        def generatePlotTypes(self, mapData, water_percent=78, shift_plot_types=True, grain_amount=3):
-                # Check for changes to User Input variances.
-                self.checkForOverrideDefaultUserInputVariances()
-                
-                self.hillsFrac.fracInit(self.iNumPlotsX, self.iNumPlotsY, grain_amount, self.mapRand, self.iFlags, self.fracXExp, self.fracYExp)
-                self.peaksFrac.fracInit(self.iNumPlotsX, self.iNumPlotsY, grain_amount+1, self.mapRand, self.iFlags, self.fracXExp, self.fracYExp)
-
-                water_percent += self.seaLevelChange
-                water_percent = min(water_percent, self.seaLevelMax)
-                water_percent = max(water_percent, self.seaLevelMin)
-
-                iWaterThreshold = self.continentsFrac.getHeightFromPercent(water_percent)
-                iHillsBottom1 = self.hillsFrac.getHeightFromPercent(max((self.hillGroupOneBase - self.hillGroupOneRange), 0))
-                iHillsTop1 = self.hillsFrac.getHeightFromPercent(min((self.hillGroupOneBase + self.hillGroupOneRange), 100))
-                iHillsBottom2 = self.hillsFrac.getHeightFromPercent(max((self.hillGroupTwoBase - self.hillGroupTwoRange), 0))
-                iHillsTop2 = self.hillsFrac.getHeightFromPercent(min((self.hillGroupTwoBase + self.hillGroupTwoRange), 100))
-                iPeakThreshold = self.peaksFrac.getHeightFromPercent(self.peakPercent)
-
-                for x in range(self.iNumPlotsX):
-                        for y in range(self.iNumPlotsY):
-                                i = y*self.iNumPlotsX + x
-                                val = self.continentsFrac.getHeight(x,y)
-                                if (val <= iWaterThreshold or mapData[i] == ' ') and (mapData[i] != '*' and mapData[i] != '.' and mapData[i] != '+' and mapData[i] != '#'):
-                                        self.plotTypes[i] = PlotTypes.PLOT_OCEAN
-                                else:
-                                        if mapData[i] == '.':
-                                                self.plotTypes[i] = PlotTypes.PLOT_LAND
-                                        elif mapData[i] == '+':
-                                                self.plotTypes[i] = PlotTypes.PLOT_HILLS
-                                        elif mapData[i] == '#':
-                                                self.plotTypes[i] = PlotTypes.PLOT_PEAK
-                                        else:
-                                                hillVal = self.hillsFrac.getHeight(x,y)
-                                                if ((hillVal >= iHillsBottom1 and hillVal <= iHillsTop1) or (hillVal >= iHillsBottom2 and hillVal <= iHillsTop2)):
-                                                        peakVal = self.peaksFrac.getHeight(x,y)
-                                                        if (peakVal <= iPeakThreshold):
-                                                                self.plotTypes[i] = PlotTypes.PLOT_PEAK
-                                                        else:
-                                                                self.plotTypes[i] = PlotTypes.PLOT_HILLS
-                                                else:
-                                                        self.plotTypes[i] = PlotTypes.PLOT_LAND
-                
-                if shift_plot_types:
-                        self.shiftPlotTypes()
-
-                return self.plotTypes
-
-class YYTerrainGenerator(CvMapGeneratorUtil.TerrainGenerator):
+    class YYTerrainGenerator(CvMapGeneratorUtil.TerrainGenerator):
         def __init__(self, iDesertPercent=32, iPlainsPercent=18,
                      fSnowLatitude=0.7, fTundraLatitude=0.6,
                      fGrassLatitude=0.1, fDesertBottomLatitude=0.2,
                      fDesertTopLatitude=0.5, fracXExp=-1,
                      fracYExp=-1, grain_amount=4):
 
-                self.gc = CyGlobalContext()
-                self.map = CyMap()
+            self.gc = CyGlobalContext()
+            self.map = CyMap()
 
-                grain_amount += self.gc.getWorldInfo(self.map.getWorldSize()).getTerrainGrainChange()
-                
-                self.grain_amount = grain_amount
+            grain_amount += self.gc.getWorldInfo(self.map.getWorldSize()).getTerrainGrainChange()
 
-                self.iWidth = self.map.getGridWidth()
-                self.iHeight = self.map.getGridHeight()
+            self.grain_amount = grain_amount
 
-                self.mapRand = self.gc.getGame().getMapRand()
-                
-                self.iFlags = 0  # Disallow FRAC_POLAR flag, to prevent "zero row" problems.
-                if self.map.isWrapX(): self.iFlags += CyFractal.FracVals.FRAC_WRAP_X
-                if self.map.isWrapY(): self.iFlags += CyFractal.FracVals.FRAC_WRAP_Y
+            self.iWidth = self.map.getGridWidth()
+            self.iHeight = self.map.getGridHeight()
 
-                self.deserts=CyFractal()
-                self.plains=CyFractal()
-                self.variation=CyFractal()
-                self.variationx=CyFractal()
-                self.variationy=CyFractal()
+            self.mapRand = self.gc.getGame().getMapRand()
 
-                iDesertPercent += self.gc.getClimateInfo(self.map.getClimate()).getDesertPercentChange()
-                iDesertPercent = min(iDesertPercent, 100)
-                iDesertPercent = max(iDesertPercent, 0)
+            self.iFlags = 0  # Disallow FRAC_POLAR flag, to prevent "zero row" problems.
+            if self.map.isWrapX(): self.iFlags += CyFractal.FracVals.FRAC_WRAP_X
+            if self.map.isWrapY(): self.iFlags += CyFractal.FracVals.FRAC_WRAP_Y
 
-                self.iDesertPercent = iDesertPercent
-                self.iPlainsPercent = iPlainsPercent
+            self.deserts=CyFractal()
+            self.plains=CyFractal()
+            self.variation=CyFractal()
+            self.variationx=CyFractal()
+            self.variationy=CyFractal()
 
-                self.iDesertTopPercent = 100
-                self.iDesertBottomPercent = max(0,int(100-iDesertPercent))
-                self.iPlainsTopPercent = 100
-                self.iPlainsBottomPercent = max(0,int(100-iDesertPercent-iPlainsPercent))
-                self.iMountainTopPercent = 75
-                self.iMountainBottomPercent = 60
+            iDesertPercent += self.gc.getClimateInfo(self.map.getClimate()).getDesertPercentChange()
+            iDesertPercent = min(iDesertPercent, 100)
+            iDesertPercent = max(iDesertPercent, 0)
 
-                fSnowLatitude += self.gc.getClimateInfo(self.map.getClimate()).getSnowLatitudeChange()
-                fSnowLatitude = min(fSnowLatitude, 1.0)
-                fSnowLatitude = max(fSnowLatitude, 0.0)
-                self.fSnowLatitude = fSnowLatitude
+            self.iDesertPercent = iDesertPercent
+            self.iPlainsPercent = iPlainsPercent
 
-                fTundraLatitude += self.gc.getClimateInfo(self.map.getClimate()).getTundraLatitudeChange()
-                fTundraLatitude = min(fTundraLatitude, 1.0)
-                fTundraLatitude = max(fTundraLatitude, 0.0)
-                self.fTundraLatitude = fTundraLatitude
+            self.iDesertTopPercent = 100
+            self.iDesertBottomPercent = max(0,int(100-iDesertPercent))
+            self.iPlainsTopPercent = 100
+            self.iPlainsBottomPercent = max(0,int(100-iDesertPercent-iPlainsPercent))
+            self.iMountainTopPercent = 75
+            self.iMountainBottomPercent = 60
 
-                fGrassLatitude += self.gc.getClimateInfo(self.map.getClimate()).getGrassLatitudeChange()
-                fGrassLatitude = min(fGrassLatitude, 1.0)
-                fGrassLatitude = max(fGrassLatitude, 0.0)
-                self.fGrassLatitude = fGrassLatitude
+            fSnowLatitude += self.gc.getClimateInfo(self.map.getClimate()).getSnowLatitudeChange()
+            fSnowLatitude = min(fSnowLatitude, 1.0)
+            fSnowLatitude = max(fSnowLatitude, 0.0)
+            self.fSnowLatitude = fSnowLatitude
 
-                fDesertBottomLatitude += self.gc.getClimateInfo(self.map.getClimate()).getDesertBottomLatitudeChange()
-                fDesertBottomLatitude = min(fDesertBottomLatitude, 1.0)
-                fDesertBottomLatitude = max(fDesertBottomLatitude, 0.0)
-                self.fDesertBottomLatitude = fDesertBottomLatitude
+            fTundraLatitude += self.gc.getClimateInfo(self.map.getClimate()).getTundraLatitudeChange()
+            fTundraLatitude = min(fTundraLatitude, 1.0)
+            fTundraLatitude = max(fTundraLatitude, 0.0)
+            self.fTundraLatitude = fTundraLatitude
 
-                fDesertTopLatitude += self.gc.getClimateInfo(self.map.getClimate()).getDesertTopLatitudeChange()
-                fDesertTopLatitude = min(fDesertTopLatitude, 1.0)
-                fDesertTopLatitude = max(fDesertTopLatitude, 0.0)
-                self.fDesertTopLatitude = fDesertTopLatitude
-                
-                self.fracXExp = fracXExp
-                self.fracYExp = fracYExp
+            fGrassLatitude += self.gc.getClimateInfo(self.map.getClimate()).getGrassLatitudeChange()
+            fGrassLatitude = min(fGrassLatitude, 1.0)
+            fGrassLatitude = max(fGrassLatitude, 0.0)
+            self.fGrassLatitude = fGrassLatitude
 
-                self.iNumPlotsX = self.gc.getMap().getGridWidth()
-                self.iNumPlotsY = self.gc.getMap().getGridHeight()
+            fDesertBottomLatitude += self.gc.getClimateInfo(self.map.getClimate()).getDesertBottomLatitudeChange()
+            fDesertBottomLatitude = min(fDesertBottomLatitude, 1.0)
+            fDesertBottomLatitude = max(fDesertBottomLatitude, 0.0)
+            self.fDesertBottomLatitude = fDesertBottomLatitude
 
-                self.initFractals()
+            fDesertTopLatitude += self.gc.getClimateInfo(self.map.getClimate()).getDesertTopLatitudeChange()
+            fDesertTopLatitude = min(fDesertTopLatitude, 1.0)
+            fDesertTopLatitude = max(fDesertTopLatitude, 0.0)
+            self.fDesertTopLatitude = fDesertTopLatitude
+
+            self.fracXExp = fracXExp
+            self.fracYExp = fracYExp
+
+            self.iNumPlotsX = self.gc.getMap().getGridWidth()
+            self.iNumPlotsY = self.gc.getMap().getGridHeight()
+
+            self.initFractals()
 
         def initFractals(self):
-                global yy_latitude
+            global yy_latitude
 
-                yy_latitude = [0.0] * (self.iNumPlotsX*self.iNumPlotsY)
+            yy_latitude = [0.0] * (self.iNumPlotsX*self.iNumPlotsY)
 
-                self.deserts.fracInit(self.iWidth, self.iHeight, self.grain_amount, self.mapRand, self.iFlags, self.fracXExp, self.fracYExp)
-                self.iDesertTop = self.deserts.getHeightFromPercent(self.iDesertTopPercent)
-                self.iDesertBottom = self.deserts.getHeightFromPercent(self.iDesertBottomPercent)
+            self.deserts.fracInit(self.iWidth, self.iHeight, self.grain_amount, self.mapRand, self.iFlags, self.fracXExp, self.fracYExp)
+            self.iDesertTop = self.deserts.getHeightFromPercent(self.iDesertTopPercent)
+            self.iDesertBottom = self.deserts.getHeightFromPercent(self.iDesertBottomPercent)
 
-                self.plains.fracInit(self.iWidth, self.iHeight, self.grain_amount+1, self.mapRand, self.iFlags, self.fracXExp, self.fracYExp)
-                self.iPlainsTop = self.plains.getHeightFromPercent(self.iPlainsTopPercent)
-                self.iPlainsBottom = self.plains.getHeightFromPercent(self.iPlainsBottomPercent)
+            self.plains.fracInit(self.iWidth, self.iHeight, self.grain_amount+1, self.mapRand, self.iFlags, self.fracXExp, self.fracYExp)
+            self.iPlainsTop = self.plains.getHeightFromPercent(self.iPlainsTopPercent)
+            self.iPlainsBottom = self.plains.getHeightFromPercent(self.iPlainsBottomPercent)
 
-                self.variation.fracInit(self.iWidth, self.iHeight, self.grain_amount, self.mapRand, self.iFlags, self.fracXExp, self.fracYExp)
-                self.variationx.fracInit(self.iWidth, self.iHeight, self.grain_amount, self.mapRand, self.iFlags, self.fracXExp, self.fracYExp)
-                self.variationy.fracInit(self.iWidth, self.iHeight, self.grain_amount - 2, self.mapRand, self.iFlags, self.fracXExp, self.fracYExp)
+            self.variation.fracInit(self.iWidth, self.iHeight, self.grain_amount, self.mapRand, self.iFlags, self.fracXExp, self.fracYExp)
+            self.variationx.fracInit(self.iWidth, self.iHeight, self.grain_amount, self.mapRand, self.iFlags, self.fracXExp, self.fracYExp)
+            self.variationy.fracInit(self.iWidth, self.iHeight, self.grain_amount - 2, self.mapRand, self.iFlags, self.fracXExp, self.fracYExp)
 
-                self.terrainDesert = self.gc.getInfoTypeForString("TERRAIN_DESERT")
-                self.terrainPlains = self.gc.getInfoTypeForString("TERRAIN_PLAINS")
-                self.terrainIce = self.gc.getInfoTypeForString("TERRAIN_SNOW")
-                self.terrainTundra = self.gc.getInfoTypeForString("TERRAIN_TUNDRA")
-                self.terrainGrass = self.gc.getInfoTypeForString("TERRAIN_GRASS")
+            self.terrainDesert = self.gc.getInfoTypeForString("TERRAIN_DESERT")
+            self.terrainPlains = self.gc.getInfoTypeForString("TERRAIN_PLAINS")
+            self.terrainIce = self.gc.getInfoTypeForString("TERRAIN_SNOW")
+            self.terrainTundra = self.gc.getInfoTypeForString("TERRAIN_TUNDRA")
+            self.terrainGrass = self.gc.getInfoTypeForString("TERRAIN_GRASS")
 
-                low = self.variationx.getHeightFromPercent(5)
-                hi = self.variationx.getHeightFromPercent(95)
+            low = self.variationx.getHeightFromPercent(5)
+            hi = self.variationx.getHeightFromPercent(95)
 
-                lowy = self.variationy.getHeightFromPercent(5)
-                hiy = self.variationy.getHeightFromPercent(95)
+            lowy = self.variationy.getHeightFromPercent(5)
+            hiy = self.variationy.getHeightFromPercent(95)
 
-                fur = self.mapRand.get(20, "Generate Plot Types PYTHON")
-                self.range = 0.2 + 0.02 * fur
-                self.pos = -0.6 + 0.02 * self.mapRand.get(50 - fur, "Generate Plot Types PYTHON")
+            fur = self.mapRand.get(20, "Generate Plot Types PYTHON")
+            self.range = 0.2 + 0.02 * fur
+            self.pos = -0.6 + 0.02 * self.mapRand.get(50 - fur, "Generate Plot Types PYTHON")
 
-                for x in range(self.iNumPlotsX):
-                        for y in range(self.iNumPlotsY):
-                                i = y*self.iNumPlotsX + x
-                                if getClimateType() == 0:
-                                        yy_latitude[i] = abs((self.iHeight / 2) - y)/float(self.iHeight/2)
-                                elif getClimateType () == 1:
-                                        yy_latitude[i] = (y)/float(self.iHeight) * 0.92
-                                elif getClimateType () == 2:
-                                        yy_latitude[i] = (self.variationx.getHeight(x, y) - low) / float(hi - low)
-                                        if yy_latitude[i] < 0:
-                                                yy_latitude[i] = 0.0
-                                        if yy_latitude[i] > 1:
-                                                yy_latitude[i] = 1.0
-                                elif getClimateType () == 3:
-                                        yy_latitude[i] = abs((y)/float(self.iHeight) * self.range + self.pos)
-                                else:
-                                        yy_latitude[i] = (self.variationy.getHeight(x, y) - lowy) / float(hiy - lowy) * 0.7 + 0.15
-                                        if yy_latitude[i] < 0:
-                                                yy_latitude[i] = 0.0
-                                        if yy_latitude[i] > 1:
-                                                yy_latitude[i] = 1.0
+            for x in range(self.iNumPlotsX):
+                for y in range(self.iNumPlotsY):
+                    i = y*self.iNumPlotsX + x
+                    if getClimateType() == 0:
+                        yy_latitude[i] = abs((self.iHeight / 2) - y)/float(self.iHeight/2)
+                    elif getClimateType () == 1:
+                        yy_latitude[i] = (y)/float(self.iHeight) * 0.92
+                    elif getClimateType () == 2:
+                        yy_latitude[i] = (self.variationx.getHeight(x, y) - low) / float(hi - low)
+                        if yy_latitude[i] < 0:
+                            yy_latitude[i] = 0.0
+                        if yy_latitude[i] > 1:
+                            yy_latitude[i] = 1.0
+                    elif getClimateType () == 3:
+                        yy_latitude[i] = abs((y)/float(self.iHeight) * self.range + self.pos)
+                    else:
+                        yy_latitude[i] = (self.variationy.getHeight(x, y) - lowy) / float(hiy - lowy) * 0.7 + 0.15
+                        if yy_latitude[i] < 0:
+                            yy_latitude[i] = 0.0
+                        if yy_latitude[i] > 1:
+                            yy_latitude[i] = 1.0
 
         def getLatitudeAtPlot(self, iX, iY):
-                lat = yy_latitude[iX + iY * self.iNumPlotsX]
+            lat = yy_latitude[iX + iY * self.iNumPlotsX]
 
-                # Adjust latitude using self.variation fractal, to mix things up:
-                lat += (128 - self.variation.getHeight(iX, iY))/(255.0 * 5.0)
+            # Adjust latitude using self.variation fractal, to mix things up:
+            lat += (128 - self.variation.getHeight(iX, iY))/(255.0 * 5.0)
 
-                # Limit to the range [0, 1]:
-                if lat < 0:
-                        lat = 0.0
-                if lat > 1:
-                        lat = 1.0
+            # Limit to the range [0, 1]:
+            if lat < 0:
+                lat = 0.0
+            if lat > 1:
+                lat = 1.0
 
-                return lat
-                                
-class YYFeatureGenerator (CvMapGeneratorUtil.FeatureGenerator):
+            return lat
+
+    class YYFeatureGenerator (CvMapGeneratorUtil.FeatureGenerator):
         def getLatitudeAtPlot(self, iX, iY):
-                "returns a value in the range of 0.0 (tropical) to 1.0 (polar)"
-                return yy_latitude[iX + iY * CyGlobalContext().getMap().getGridWidth()]
+            "returns a value in the range of 0.0 (tropical) to 1.0 (polar)"
+            return yy_latitude[iX + iY * CyGlobalContext().getMap().getGridWidth()]
 
-def generatePlotTypes():
+    def generatePlotTypes():
         NiTextOut("Setting Plot Types (Python Fractal) ...")
         if getGeneratorType () == 0:
-                # iid
-                fractal_world = IIDPlotGenerator()
-                fractal_world.initFractal()
-                return fractal_world.generatePlotTypes()
+            # iid
+            fractal_world = IIDPlotGenerator()
+            fractal_world.initFractal()
+            return fractal_world.generatePlotTypes()
         elif getGeneratorType () == 1:
-                # Fractal Land
+            # Fractal Land
 
-                water_percent = 40
-                water_percent = water_percent + CyGlobalContext().getSeaLevelInfo(CyGlobalContext().getMap().getSeaLevel()).getSeaLevelChange()
-                water_percent = min(water_percent, 100)
-                water_percent = max(water_percent, 0)
+            water_percent = 40
+            water_percent = water_percent + CyGlobalContext().getSeaLevelInfo(CyGlobalContext().getMap().getSeaLevel()).getSeaLevelChange()
+            water_percent = min(water_percent, 100)
+            water_percent = max(water_percent, 0)
 
-                hillRange = CyGlobalContext().getClimateInfo(CyGlobalContext().getMap().getClimate()).getHillRange()
-                peakPercent = CyGlobalContext().getClimateInfo(CyGlobalContext().getMap().getClimate()).getPeakPercent()
+            hillRange = CyGlobalContext().getClimateInfo(CyGlobalContext().getMap().getClimate()).getHillRange()
+            peakPercent = CyGlobalContext().getClimateInfo(CyGlobalContext().getMap().getClimate()).getPeakPercent()
 
-                map_data = FractalTerrainGenerator(CyGlobalContext().getMap().getGridWidth(), CyGlobalContext().getMap().getGridHeight(), symmetry = getSymmetryType(), wrapH = getWrapX(), wrapV = getWrapY(), waterPercent = water_percent, hillRange = hillRange, peakPercent = peakPercent)
+            map_data = FractalTerrainGenerator(
+                    CyGlobalContext().getMap().getGridWidth(),
+                    CyGlobalContext().getMap().getGridHeight(),
+                    symmetry = getSymmetryType(),
+                    wrapH = getWrapX(),
+                    wrapV = getWrapY(),
+                    waterPercent = water_percent,
+                    hillRange = hillRange,
+                    peakPercent = peakPercent
+                    )
 
-                fractal_world = PostprocessPlotGenerator()
-                fractal_world.initFractal()
+            fractal_world = PostprocessPlotGenerator()
+            fractal_world.initFractal()
 
-                res = fractal_world.generatePlotTypes(map_data)
+            res = fractal_world.generatePlotTypes(map_data)
 
-                return res
+            return res
         else:
-                # Riveria
+            # Riveria
 
-                water_percent = 25
-                water_percent = water_percent + CyGlobalContext().getSeaLevelInfo(CyGlobalContext().getMap().getSeaLevel()).getSeaLevelChange()
-                water_percent = min(water_percent, 100)
-                water_percent = max(water_percent, 0)
+            water_percent = 25
+            water_percent = water_percent + CyGlobalContext().getSeaLevelInfo(CyGlobalContext().getMap().getSeaLevel()).getSeaLevelChange()
+            water_percent = min(water_percent, 100)
+            water_percent = max(water_percent, 0)
 
-                map_data = RiveriaTerrainGenerator(CyGlobalContext().getMap().getGridWidth(), CyGlobalContext().getMap().getGridHeight(), symmetry = getSymmetryType(), wrapH = getWrapX(), wrapV = getWrapY(), waterPercent = water_percent)
+            map_data = RiveriaTerrainGenerator(CyGlobalContext().getMap().getGridWidth(), CyGlobalContext().getMap().getGridHeight(), symmetry = getSymmetryType(), wrapH = getWrapX(), wrapV = getWrapY(), waterPercent = water_percent)
 
-                fractal_world = PostprocessPlotGenerator()
-                fractal_world.initFractal()
+            fractal_world = PostprocessPlotGenerator()
+            fractal_world.initFractal()
 
-                res = fractal_world.generatePlotTypes(map_data, shift_plot_types = False)
+            res = fractal_world.generatePlotTypes(map_data, shift_plot_types = False)
 
-                return res
+            return res
 
-def generateTerrainTypes():
+    def generateTerrainTypes():
         NiTextOut("Generating Terrain (Python Fractal) ...")
         terraingen = YYTerrainGenerator()
         terrainTypes = terraingen.generateTerrain()
         return terrainTypes
 
-def addFeatures():
+    def addFeatures():
         NiTextOut("Adding Features (Python Fractal) ...")
         featuregen = YYFeatureGenerator()
         featuregen.addFeatures()
         return 0
 
+    # End of civ4-specific stuff
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# the following is from dragonite.py!
 def randomPoint ():
     while (True):
         x = complex (random.gauss(0, 1), random.gauss(0, 1))
@@ -558,7 +542,7 @@ def fixConnectivity (map, w, h, wrapV, wrapH):
             if map[c] != '#' and not visited[c]:
                 x = floodfill(map, w, h, wrapV, wrapH, c % w, c // w, visited, '#')
                 break
-    
+
         queue = []
         previous = {}
         visited2 = list(visited)
@@ -630,18 +614,18 @@ class varDiamondTransformer(transformer):
         return coord
         rho = abs(coord)
         if rho < 1e-8:
-            return None 
+            return None
 
         theta = math.atan2(coord.imag, coord.real)
         quadrant = math.floor(theta / (math.pi / 2)) * math.pi / 2
         theta = theta - quadrant - math.pi / 4
-        
+
         rho = math.sqrt(rho + 1./16)
         x = rho * math.sin(theta)
         ya = 2 * (rho**2) * (math.cos(theta)**2)
         y = (ya + 1 / ya)/math.sqrt(8)
-        
-        return cmath.exp((quadrant + math.pi / 4) * 1j) * y + cmath.exp((quadrant + 3 * math.pi / 4) * 1j) * x 
+
+        return cmath.exp((quadrant + math.pi / 4) * 1j) * y + cmath.exp((quadrant + 3 * math.pi / 4) * 1j) * x
 
     def __str__ (self):
         return "<vardiamond>"
@@ -678,7 +662,7 @@ class pickerTransformer(transformer):
     def __init__ (self, transformerList, symmetry):
 
         n = len(transformerList)
-        
+
         weightList = [0.0] * n
         for i in range(n):
             weightList[i] = random.expovariate(1.0)
@@ -746,14 +730,14 @@ class treeTransformer(transformer):
             regularity = 1.5
         if fun < 0:
             fun = 0
-        
+
         if random.random() <= (1.2 - fun) / 2.4:
             # linear transformer
             self.trans = linearTransformer(minExpansionRatio, maxExpansionRatio, 3.03 / (regularity + 0.01))
         elif random.expovariate(2.0) <= 0.8 * fun and depthLimit > 1:
             if random.randrange(4) < 1:
                 # sequence transformer
-                
+
                 delta = (maxExpansionRatio - minExpansionRatio) * 0.2
                 transA = treeTransformer(regularity + 0.2, fun - 0.5, depthLimit - 1,
                                          minExpansionRatio + delta, maxExpansionRatio - delta)
@@ -785,7 +769,7 @@ class treeTransformer(transformer):
                 pre_trans = linearTransformer(minExpansionRatio, maxExpansionRatio, 2.525 / (regularity + 0.01))
                 varDiamond_trans = varDiamondTransformer()
                 self.trans = sequenceTransformer((pre_trans, varDiamond_trans))
-                
+
     def transform (self, coord):
         return self.trans.transform(coord)
 
@@ -808,13 +792,13 @@ def drawFractal(width = 20, height = 15, wrapV = False, wrapH = True,
                 transList[i] = treeTransformer(1.0, 1.0, 3, 0.5, 1.0)
             else:
                 transList[i] = treeTransformer(random.random(), random.expovariate(0.7), 2, 0.1, 1.0)
-        
+
         # Make it a picker
         picker = pickerTransformer(transList, symmetry)
 
         # Test run
         points = []
-        
+
         for i in range(50 + width * height // 2):
             coord = randomPoint()
 
@@ -835,7 +819,7 @@ def drawFractal(width = 20, height = 15, wrapV = False, wrapH = True,
         offset = complex(-xs[len(xs) // 2], -ys[len(ys) // 2])
 
         # check the radius conditions
-        
+
         rs = [abs(p+offset) for p in points]
         rs.sort()
         success = True
@@ -852,7 +836,7 @@ def drawFractal(width = 20, height = 15, wrapV = False, wrapH = True,
             wellScaled = False
             smallestLargeBadScale = 1e1000
             currentScaleMaxTrial = scaleMaxTrial
-            
+
             while not wellScaled and currentScaleMaxTrial > 0:
                 scale = (width + height) * random.expovariate(2)
 
@@ -887,10 +871,10 @@ def drawFractal(width = 20, height = 15, wrapV = False, wrapH = True,
                 success = False
             else:
                 nIteration = int(width * height * quality * (len(points) / float(nInside)) / 100)
-                
+
                 mapData = [0] * (width * height)
                 for i in range(nIteration):
-                    
+
                     coord = randomPoint()
 
                     for j in range(100):
@@ -968,9 +952,9 @@ def FractalTerrainGenerator(width = 20, height = 15, wrapV = False, wrapH = True
                     res[newCoord] = '+';
                 if mapData[oldCoord] > peakLine:
                     res[newCoord] = '#';
-    
+
     fixConnectivity (res, width, height, wrapV, wrapH)
-        
+
     return res
 
 def intCoord (coord, scale, w, h, wrapV, wrapH):
@@ -979,7 +963,7 @@ def intCoord (coord, scale, w, h, wrapV, wrapH):
         coord2 = coord2[0] % w, coord2[1]
     if (wrapV):
         coord2 = coord2[0], coord2[1] % h
-    
+
     return coord2
 
 def isNear (c1, c2):
@@ -1008,7 +992,7 @@ def drawLine (res, t, scale, w, h, coord, direc, l1, l2, wrapV, wrapH, symmetry,
 
     c1i = symmetryList (t.transform(coord + direc * l1), symmetry)
     c2i = symmetryList (t.transform(coord + direc * l2), symmetry)
-    
+
     withinBoundry = False
     for x in c1i + c2i:
         c = intCoord(x, scale, w, h, wrapV, wrapH)
@@ -1035,18 +1019,17 @@ def RiveriaTerrainGenerator(width = 20, height = 15, wrapV = False, wrapH = True
         t = treeTransformer(0.5, 1.5, 3, 0.3, 1.2)
 
         res = ['*'] * (width * height)
-        scale = math.sqrt(width ** 2 + height ** 2) * 0.25
+        scale = math.sqrt(width ** 2 + height ** 2) * 0.375
         retry = 32
-        
-        while res.count(' ') < (waterPercent - 5) * 0.01 * len(res) and retry > 0:
 
+        while res.count(' ') < (waterPercent - 5) * 0.01 * len(res) and retry > 0:
             coord = randomPoint()
             direc = complex(cmath.exp(random.random() * math.pi * 2j))
 
             length = random.random()
             c1 = coord - direc * length
             c2 = coord + direc * length
-            
+
             c1i = intCoord(t.transform(c1), scale, width, height, wrapV, wrapH)
             c2i = intCoord(t.transform(c2), scale, width, height, wrapV, wrapH)
 
@@ -1055,7 +1038,7 @@ def RiveriaTerrainGenerator(width = 20, height = 15, wrapV = False, wrapH = True
 
                 c1 = coord - direc * length
                 c2 = coord + direc * length
-                
+
                 c1i = intCoord(t.transform(c1), scale, width, height, wrapV, wrapH)
                 c2i = intCoord(t.transform(c2), scale, width, height, wrapV, wrapH)
 
@@ -1084,7 +1067,7 @@ def ShadeTerrainGenerator(width = 20, height = 15, wrapV = False, wrapH = True,
             for y in range(height):
                 i = x * height + y
                 mapData[i] = t2.transform(t.transform(complex (x - (width - 1) / 2.0, y - (height - 1) / 2.0) / scale)).real
-        
+
         vals = list(mapData)
         vals.sort()
 
@@ -1118,3 +1101,17 @@ def ShadeTerrainGenerator(width = 20, height = 15, wrapV = False, wrapH = True,
         finished = True
 
     return res
+
+def printMap(w, h, m):
+    for i in range(h):
+        print("".join(m[i*w:(i+1)*w]))
+
+if __name__ == "__main__":
+    H = 34
+    W = 55
+    m = FractalTerrainGenerator(W, H, symmetry = -1)
+    printMap(W, H, m)
+    print(countIslands(m, W, H, False, True))
+    print(countContinents(m, W, H, False, True))
+
+    printMap(W, H, RiveriaTerrainGenerator(W, H, symmetry = -1))
