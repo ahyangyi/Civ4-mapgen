@@ -34,7 +34,7 @@ if __name__ != "__main__":
     def getNumCustomMapOptionValues(argsList):
         selection_names = {
                 0: 3,
-                1: 3,
+                1: 4,
                 2: 10,
                 3: 6,
                 }
@@ -47,7 +47,8 @@ if __name__ != "__main__":
                 "Toroid"],
             1: ["IID",
                 "Fractal Land",
-                "Riveria"],
+                "Riveria",
+                "Shader"],
             2: ["None",
                 "2-Rotational",
                 "3-Rotational",
@@ -251,6 +252,7 @@ if __name__ != "__main__":
                         elif mapData[i] == '#':
                             self.plotTypes[i] = PlotTypes.PLOT_PEAK
                         else:
+                            # '*': a wildcard grid for any land type
                             hillVal = self.hillsFrac.getHeight(x,y)
                             if ((hillVal >= iHillsBottom1 and hillVal <= iHillsTop1) or (hillVal >= iHillsBottom2 and hillVal <= iHillsTop2)):
                                 peakVal = self.peaksFrac.getHeight(x,y)
@@ -262,7 +264,7 @@ if __name__ != "__main__":
                                 self.plotTypes[i] = PlotTypes.PLOT_LAND
 
             if shift_plot_types:
-                    self.shiftPlotTypes()
+                self.shiftPlotTypes()
 
             return self.plotTypes
 
@@ -451,7 +453,7 @@ if __name__ != "__main__":
             res = fractal_world.generatePlotTypes(map_data)
 
             return res
-        else:
+        elif getGeneratorType () == 2:
             # Riveria
 
             water_percent = 25
@@ -460,6 +462,22 @@ if __name__ != "__main__":
             water_percent = max(water_percent, 0)
 
             map_data = RiveriaTerrainGenerator(CyGlobalContext().getMap().getGridWidth(), CyGlobalContext().getMap().getGridHeight(), symmetry = getSymmetryType(), wrapH = getWrapX(), wrapV = getWrapY(), waterPercent = water_percent)
+
+            fractal_world = PostprocessPlotGenerator()
+            fractal_world.initFractal()
+
+            res = fractal_world.generatePlotTypes(map_data, shift_plot_types = False)
+
+            return res
+        else:
+            # Shade
+
+            water_percent = 40
+            water_percent = water_percent + CyGlobalContext().getSeaLevelInfo(CyGlobalContext().getMap().getSeaLevel()).getSeaLevelChange()
+            water_percent = min(water_percent, 100)
+            water_percent = max(water_percent, 0)
+
+            map_data = ShadeTerrainGenerator(CyGlobalContext().getMap().getGridWidth(), CyGlobalContext().getMap().getGridHeight(), symmetry = getSymmetryType(), wrapH = getWrapX(), wrapV = getWrapY(), waterPercent = water_percent)
 
             fractal_world = PostprocessPlotGenerator()
             fractal_world.initFractal()
@@ -1057,16 +1075,15 @@ def ShadeTerrainGenerator(width = 20, height = 15, wrapV = False, wrapH = True,
     finished = False
 
     while not finished:
-        t = treeTransformer(0.5, 1.5, 7, 0.2, 1.5)
-        t2 = linearTransformer()
+        t = treeTransformer(0.5, 3.5, 7, 0.2, 1.5)
 
         mapData = [0] * (width * height)
-        scale = math.sqrt(width ** 2 + height ** 2) * 0.25
+        scale = math.sqrt(width ** 2 + height ** 2) * 0.1
 
         for x in range(width):
             for y in range(height):
                 i = x * height + y
-                mapData[i] = t2.transform(t.transform(complex (x - (width - 1) / 2.0, y - (height - 1) / 2.0) / scale)).real
+                mapData[i] = t.transform(complex (x - (width - 1) / 2.0, y - (height - 1) / 2.0) / scale).real
 
         vals = list(mapData)
         vals.sort()
@@ -1075,7 +1092,6 @@ def ShadeTerrainGenerator(width = 20, height = 15, wrapV = False, wrapH = True,
         if realWaterPercent < 0:
             realWaterPercent = 0
         if realWaterPercent > 100:
-            realWaterPercent = 100
             realWaterPercent = 99.999
         if hillRange <= 0:
             hillRange = 0.001
@@ -1091,13 +1107,12 @@ def ShadeTerrainGenerator(width = 20, height = 15, wrapV = False, wrapH = True,
             for y in range(height):
                 newCoord = y * width + x
                 oldCoord = x * height + y
-                if mapData[oldCoord] > 0:
-                    if mapData[oldCoord] >= waterLine:
-                        res[newCoord] = '.';
-                    if mapData[oldCoord] >= hillLine:
-                        res[newCoord] = '+';
-                    if mapData[oldCoord] > peakLine:
-                        res[newCoord] = '#';
+                if mapData[oldCoord] >= waterLine:
+                    res[newCoord] = '.';
+                if mapData[oldCoord] >= hillLine:
+                    res[newCoord] = '+';
+                if mapData[oldCoord] > peakLine:
+                    res[newCoord] = '#';
         finished = True
 
     return res
@@ -1109,9 +1124,9 @@ def printMap(w, h, m):
 if __name__ == "__main__":
     H = 34
     W = 55
-    m = FractalTerrainGenerator(W, H, symmetry = -1)
-    printMap(W, H, m)
-    print(countIslands(m, W, H, False, True))
-    print(countContinents(m, W, H, False, True))
 
-    printMap(W, H, RiveriaTerrainGenerator(W, H, symmetry = -1))
+    for gen in [FractalTerrainGenerator, RiveriaTerrainGenerator, ShadeTerrainGenerator]:
+        m = gen(W, H, symmetry = -1)
+        printMap(W, H, m)
+        print(countIslands(m, W, H, False, True))
+        print(countContinents(m, W, H, False, True))
