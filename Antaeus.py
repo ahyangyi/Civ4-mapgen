@@ -629,7 +629,6 @@ class diamondTransformer(transformer):
 
 class varDiamondTransformer(transformer):
     def transform(self, coord):
-        return coord
         rho = abs(coord)
         if rho < 1e-8:
             return None
