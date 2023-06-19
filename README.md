@@ -23,6 +23,11 @@ Draw “rivers” consisting of water tiles. Navy is probably necessary, but it 
 
 ![Riveria](https://raw.githubusercontent.com/ahyangyi/Civ4-mapgen/master/images/riveria.jpg)
 
+### Shader
+Draws water, hills and mountains in broad strokes. Will probably contain one cluster of mountains and one big ocean, but the distribution and shape unpredictable.
+
+![Shader](https://raw.githubusercontent.com/ahyangyi/Civ4-mapgen/master/images/shader.jpg)
+
 ## Minor Options
 Default water level and climate options are supported.
 
