@@ -3,6 +3,7 @@ import math
 import random
 import cmath
 
+# Civ4-only Stuff
 if __name__ != "__main__":
     from CvPythonExtensions import *
     import CvUtil
@@ -162,9 +163,7 @@ if __name__ != "__main__":
             # Check for changes to User Input variances.
             self.checkForOverrideDefaultUserInputVariances()
 
-            water_percent += self.seaLevelChange
-            water_percent = min(water_percent, self.seaLevelMax)
-            water_percent = max(water_percent, self.seaLevelMin)
+            water_percent = clip(water_percept + self.seaLevelChange, self.seaLevelMin, self.seaLevelMax)
 
             for x in range(self.iNumPlotsX):
                 for y in range(self.iNumPlotsY):
@@ -225,10 +224,7 @@ if __name__ != "__main__":
                 self.fracYExp,
             )
 
-            water_percent += self.seaLevelChange
-            water_percent = min(water_percent, self.seaLevelMax)
-            water_percent = max(water_percent, self.seaLevelMin)
-
+            water_percent = clip(water_percent + self.seaLevelChange, self.seaLevelMin, self.seaLevelMax)
             iWaterThreshold = self.continentsFrac.getHeightFromPercent(water_percent)
             iHillsBottom1 = self.hillsFrac.getHeightFromPercent(
                 max((self.hillGroupOneBase - self.hillGroupOneRange), 0)
@@ -466,12 +462,12 @@ if __name__ != "__main__":
             # Fractal Land
 
             water_percent = 40
-            water_percent = (
+            water_percent = clip(
                 water_percent
-                + CyGlobalContext().getSeaLevelInfo(CyGlobalContext().getMap().getSeaLevel()).getSeaLevelChange()
+                + CyGlobalContext().getSeaLevelInfo(CyGlobalContext().getMap().getSeaLevel()).getSeaLevelChange(),
+                0,
+                100,
             )
-            water_percent = min(water_percent, 100)
-            water_percent = max(water_percent, 0)
 
             hillRange = CyGlobalContext().getClimateInfo(CyGlobalContext().getMap().getClimate()).getHillRange()
             peakPercent = CyGlobalContext().getClimateInfo(CyGlobalContext().getMap().getClimate()).getPeakPercent()
@@ -497,12 +493,12 @@ if __name__ != "__main__":
             # Riveria
 
             water_percent = 25
-            water_percent = (
+            water_percent = clip(
                 water_percent
-                + CyGlobalContext().getSeaLevelInfo(CyGlobalContext().getMap().getSeaLevel()).getSeaLevelChange()
+                + CyGlobalContext().getSeaLevelInfo(CyGlobalContext().getMap().getSeaLevel()).getSeaLevelChange(),
+                0,
+                100,
             )
-            water_percent = min(water_percent, 100)
-            water_percent = max(water_percent, 0)
 
             map_data = RiveriaTerrainGenerator(
                 CyGlobalContext().getMap().getGridWidth(),
@@ -523,12 +519,12 @@ if __name__ != "__main__":
             # Shade
 
             water_percent = 40
-            water_percent = (
+            water_percent = clip(
                 water_percent
-                + CyGlobalContext().getSeaLevelInfo(CyGlobalContext().getMap().getSeaLevel()).getSeaLevelChange()
+                + CyGlobalContext().getSeaLevelInfo(CyGlobalContext().getMap().getSeaLevel()).getSeaLevelChange(),
+                0,
+                100,
             )
-            water_percent = min(water_percent, 100)
-            water_percent = max(water_percent, 0)
 
             map_data = ShadeTerrainGenerator(
                 CyGlobalContext().getMap().getGridWidth(),
@@ -558,7 +554,12 @@ if __name__ != "__main__":
         featuregen.addFeatures()
         return 0
 
-    # End of civ4-specific stuff
+
+# End of civ4-specific stuff
+
+
+def clip(x, lb, ub):
+    return max(min(x, ub), lb)
 
 
 def randomPoint():
@@ -851,10 +852,7 @@ class interpolatorTransformer(transformer):
 
 class treeTransformer(transformer):
     def __init__(self, regularity=1.0, fun=1.0, depthLimit=2, minExpansionRatio=0.2, maxExpansionRatio=1.1):
-        if regularity < 0:
-            regularity = 0
-        if regularity > 1.5:
-            regularity = 1.5
+        regularity = clip(regularity, 0, 1.5)
         if fun < 0:
             fun = 0
 
@@ -1077,19 +1075,12 @@ def FractalTerrainGenerator(
         minInsideRate=0.10,
     )
 
-    vals = list(mapData)
-    vals.sort()
+    vals = sorted(list(mapData))
+    vals.append(vals[-1] + 1)
 
-    realWaterPercent = waterPercent + random.random() * 20 - 10
-    if realWaterPercent < 0:
-        realWaterPercent = 0
-    if realWaterPercent > 100:
-        realWaterPercent = 100
-        realWaterPercent = 99.999
-    if hillRange <= 0:
-        hillRange = 0.001
-    if peakPercent <= 0:
-        peakPercent = 0.001
+    realWaterPercent = clip(waterPercent + random.random() * 20 - 10, 0, 100)
+    hillRange = clip(hillRange, 0, 100)
+    peakPercent = clip(peakPercent, 0, 100)
 
     waterLine = vals[int(len(vals) * (realWaterPercent * 0.01))]
     hillLine = vals[int(len(vals) * (1 - hillRange * 4 * 0.01))]
@@ -1257,6 +1248,8 @@ def ShadeTerrainGenerator(
                 if mapData[oldCoord] > peakLine:
                     res[newCoord] = "#"
         finished = True
+
+    fixConnectivity(res, width, height, wrapV, wrapH)
 
     return res
 
