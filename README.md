@@ -33,7 +33,7 @@ Draws water, hills and mountains in broad strokes. Will probably contain one clu
 ## Minor Options
 Default water level and climate options are supported.
 
-Maps can be generated in various symmetry. Note that the option does not guarantee any symmetry in placement of starting locations.
+Maps can be generated in various symmetry types. The symmetry will be approximate, as is necessary for the more unusual types of symmetry (how can you get an “accurate” 3-way rotational symmetry?). It does not affect starting location placement either.
 
 ![2-way rotational symmetry](https://raw.githubusercontent.com/ahyangyi/Civ4-mapgen/master/images/symmetry.jpg)
 
