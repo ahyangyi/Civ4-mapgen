@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import math
 import random
 import cmath
@@ -1260,11 +1260,21 @@ def printMap(w, h, m):
 
 
 if __name__ == "__main__":
-    H = 34
-    W = 55
+    import argparse
 
-    for gen in [FractalTerrainGenerator, RiveriaTerrainGenerator, ShadeTerrainGenerator]:
-        m = gen(W, H, symmetry=-1)
-        printMap(W, H, m)
-        print(countIslands(m, W, H, False, True))
-        print(countContinents(m, W, H, False, True))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--mode", choices=["fractal", "riveria", "shade"], default="fractal")
+    parser.add_argument("-W", type=int, default=55)
+    parser.add_argument("-H", type=int, default=34)
+    args = parser.parse_args()
+
+    generator = {
+        "fractal": FractalTerrainGenerator,
+        "riveria": RiveriaTerrainGenerator,
+        "shade": ShadeTerrainGenerator,
+    }[args.mode]
+    W, H = args.W, args.H
+
+    m = generator(W, H, symmetry=-1)
+    printMap(W, H, m)
+    print(f"Islands: {countIslands(m, W, H, False, True)}, Continents: {countContinents(m, W, H, False, True)}")
