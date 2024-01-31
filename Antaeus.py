@@ -1206,52 +1206,52 @@ def RiveriaTerrainGenerator(width=20, height=15, wrapV=False, wrapH=True, waterP
 def ShadeTerrainGenerator(
     width=20, height=15, wrapV=False, wrapH=True, waterPercent=40, symmetry=0, hillRange=5, peakPercent=25
 ):
-    finished = False
+    t = treeTransformer(0.5, 3.5, 7, 0.2, 1.5)
 
-    while not finished:
-        t = treeTransformer(0.5, 3.5, 7, 0.2, 1.5)
+    mapData = [0] * (width * height)
+    scale = math.sqrt(width**2 + height**2) * 0.1
 
-        mapData = [0] * (width * height)
-        scale = math.sqrt(width**2 + height**2) * 0.1
+    for x in range(width):
+        for y in range(height):
+            i = x * height + y
+            mapData[i] = t.transform(complex(x - (width - 1) / 2.0, y - (height - 1) / 2.0) / scale).real
 
-        for x in range(width):
-            for y in range(height):
-                i = x * height + y
-                mapData[i] = t.transform(complex(x - (width - 1) / 2.0, y - (height - 1) / 2.0) / scale).real
+    vals = list(mapData)
+    vals.sort()
 
-        vals = list(mapData)
-        vals.sort()
+    realWaterPercent = waterPercent + random.random() * 20 - 10
+    if realWaterPercent < 0:
+        realWaterPercent = 0
+    if realWaterPercent > 100:
+        realWaterPercent = 99.999
+    if hillRange <= 0:
+        hillRange = 0.001
+    if peakPercent <= 0:
+        peakPercent = 0.001
 
-        realWaterPercent = waterPercent + random.random() * 20 - 10
-        if realWaterPercent < 0:
-            realWaterPercent = 0
-        if realWaterPercent > 100:
-            realWaterPercent = 99.999
-        if hillRange <= 0:
-            hillRange = 0.001
-        if peakPercent <= 0:
-            peakPercent = 0.001
+    waterLine = vals[int(len(vals) * (realWaterPercent * 0.01))]
+    hillLine = vals[int(len(vals) * (1 - hillRange * 4 * 0.01))]
+    peakLine = vals[int(len(vals) * (1 - hillRange * 4 * peakPercent * 0.0001))]
+    res = [" "] * (width * height)
 
-        waterLine = vals[int(len(vals) * (realWaterPercent * 0.01))]
-        hillLine = vals[int(len(vals) * (1 - hillRange * 4 * 0.01))]
-        peakLine = vals[int(len(vals) * (1 - hillRange * 4 * peakPercent * 0.0001))]
-        res = [" "] * (width * height)
-
-        for x in range(width):
-            for y in range(height):
-                newCoord = y * width + x
-                oldCoord = x * height + y
-                if mapData[oldCoord] >= waterLine:
-                    res[newCoord] = "."
-                if mapData[oldCoord] >= hillLine:
-                    res[newCoord] = "+"
-                if mapData[oldCoord] > peakLine:
-                    res[newCoord] = "#"
-        finished = True
+    for x in range(width):
+        for y in range(height):
+            newCoord = y * width + x
+            oldCoord = x * height + y
+            if mapData[oldCoord] >= waterLine:
+                res[newCoord] = "."
+            if mapData[oldCoord] >= hillLine:
+                res[newCoord] = "+"
+            if mapData[oldCoord] > peakLine:
+                res[newCoord] = "#"
 
     fixConnectivity(res, width, height, wrapV, wrapH)
 
     return res
+
+
+# Console-only Stuff
+# Python 3 only below
 
 
 def printMap(w, h, m):
