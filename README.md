@@ -2,7 +2,7 @@ The Antaeus Map Generator
 =========================
 
 ## Usage
-Put the `Antaeus.py` into the `PublicMaps` directory of your Civilization IV intallation.
+Put the `Antaeus.py` into the `PublicMaps` directory of your Civilization IV installation.
 
 ## Major Modes
 
